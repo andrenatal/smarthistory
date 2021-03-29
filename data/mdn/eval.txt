@@ -1,0 +1,5 @@
+{"question": "What is the element used to create a hyperlink?", "answer": ["a", "input"]}
+{"question": "What is the element used to add an image to a page?", "answer": ["div", "img"]}
+{"question": "What is the control to input data to page?", "answer": ["input", "text"]}
+{"question": "What is the css selector to set a background of a page?", "answer": ["background"]}
+{"question": "What is the css property used to set a border color?", "answer": ["border-color"]}
