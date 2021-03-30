@@ -18,9 +18,9 @@ def validateJSON(jsonData):
 def isValidHeader(header):
     if ("seosummary" in header):
         return True
-    if ('<a href="/en-US/docs/Web/CSS">' in header):
+    if ('<a href="/en-us/docs/web/css' in header):
         return True
-    if ('<a href="/en-US/docs/CSS">' in header):
+    if ('<a href="/en-us/docs/css' in header):
         return True
 
 foldersToTrain = []
@@ -31,7 +31,7 @@ for folder in foldersToTrain:
     for filepath in glob.iglob(folder, recursive=True):
         f = open(filepath, "r")
         for line in f:
-            line = line.lower()
+            line = line.lower().strip()
             if (isValidHeader(line)):
                 line = TAG_RE.sub('', line).strip()
                 line = re.sub(r'\{[^()]*\(', '', line)
@@ -40,8 +40,6 @@ for folder in foldersToTrain:
                 line = line.replace("&gt",">")
                 line = line.replace("(","")
                 line = line.replace(")", "")
-                line = line.replace("<","")
-                line = line.replace(">", "")
                 line = line.replace('"','')
                 line = line.replace(';','')
                 jsonstr = '{{"id": "{}-{}", "text": "{}" }}'.format(filepath, index, line)

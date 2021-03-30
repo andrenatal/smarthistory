@@ -1,5 +1,20 @@
-{"question": "What is the element used to create a hyperlink?", "answer": ["a", "input"]}
-{"question": "What is the element used to add an image to a page?", "answer": ["div", "img"]}
-{"question": "What is the control to input data to page?", "answer": ["input", "text"]}
+{"question": "What is the element used to create a hyperlink?", "answer": ["<a>"]}
+{"question": "What is the element used to add an image to a page?", "answer": ["<img>"]}
+{"question": "What is the control to input data to page?", "answer": ["<input>"]}
+{"question": "What is the element used to add sound to a page??", "answer": ["<audio>"]}
+{"question": "How can I add a button to a form in a page?", "answer": ["<button>"]}
+{"question": "What is the way to create an ordered list?", "answer": ["<ol>"]}
+{"question": "What is the element to add annotation above text?", "answer": ["<ruby>"]}
+{"question": "How to add boldneess to a text?", "answer": ["strong", "<strong>"]}
+{"question": "How to can I add a line break to text?", "answer": ["<br>"]}
 {"question": "What is the css selector to set a background of a page?", "answer": ["background"]}
 {"question": "What is the css property used to set a border color?", "answer": ["border-color"]}
+{"question": "What is the css property used to distribute space between items?", "answer": ["align-content"]}
+{"question": "How can I add a background image to an element?", "answer": ["background-image"]}
+{"question": "What is the property to define the font of a text?", "answer": ["font-family"]}
+{"question": "How can I change the color of an element?", "answer": ["color"]}
+{"question": "What's the name of the command to match if an element is in full-screen mode?", "answer": [":fullscreen"]}
+{"question": "What's tag used to create a row on a table?", "answer": ["<tr>"]}
+{"question": "What's tag used to create a cell on a table?", "answer": ["<td>"]}
+{"question": "What's tag used to create a header on a table?", "answer": ["<th>"]}
+{"question": "What's the element used to wrap text?", "answer": ["float"]}
