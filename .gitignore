@@ -4,3 +4,5 @@
 *.tar.gz
 *.egg-info
 scripts/reader/official_eval.py
+data/mdn/json
+venv-drqa
