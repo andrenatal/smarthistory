@@ -119,8 +119,8 @@ __________
 - Retriever
 <small>
 <!-- language: lang-none -->
-        
-        $ python scripts/retriever/eval.py data/mdn/eval.txt --model data/mdn/db-tfidf-ngram\=2-hash\=16777216-tokenizer\=simple.npz --doc-db data/mdn/db.db --n-docs 20        
+
+        $ python scripts/retriever/eval.py data/mdn/eval.txt --model data/mdn/db-tfidf-ngram\=2-hash\=16777216-tokenizer\=simple.npz --doc-db data/mdn/db.db --n-docs 20
         eval.txt
         Examples:                       20
         Matches in top 20:              16
@@ -131,11 +131,15 @@ __________
 - Pipeline (Reader + Retriever)
 <small>
 <!-- language: lang-none -->
-        
+
         $ python scripts/pipeline/predict.py  --retriever-model data/mdn/db-tfidf-ngram=2-hash=16777216-tokenizer=simple.npz --reader-model data/mdn/multitask.mdl --doc-db data/mdn/db.db data/mdn/eval.txt --n-docs 5 --top-n 5 --out-dir data/mdn/
-        
+
         $ python data/mdn/eval_pipeline.py
         Total questions: 20
         Total matches: 8
         Total % matches: 40.0
 </small>
+
+### Model
+
+We made the pre-trained retriever model available in the file `data/mdn/db-tfidf-ngram=2-hash=16777216-tokenizer=simple.npz`
