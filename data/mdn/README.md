@@ -142,4 +142,4 @@ __________
 
 ### Model
 
-We made the pre-trained retriever model available in the file `data/mdn/db-tfidf-ngram=2-hash=16777216-tokenizer=simple.npz`
+We made the pre-trained retriever model available in the file `data/mdn/retriever_model.tar.gz`
