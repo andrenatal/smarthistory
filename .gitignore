@@ -6,3 +6,4 @@
 scripts/reader/official_eval.py
 data/mdn/json
 venv-drqa
+venv
