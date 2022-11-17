@@ -86,14 +86,10 @@ def process(question, candidates=None, top_n=1, n_docs=5):
     table = prettytable.PrettyTable(
         ['Rank', 'Answer', 'Doc', 'Answer Score', 'Doc Score']
     )
-#    for i, p in enumerate(predictions, 1):
-#        logger.info([i, p['span'], p['doc_id'],
-#                       '%.5g' % p['span_score'],
-#                       '%.5g' % p['doc_score']])
-#    logger.info('Top Predictions:')
-#    logger.info(table)
-#    logger.info('\nContexts:')
-    for p in predictions:
+    for i, p in enumerate(predictions, 1):
+        logger.info([i, p['span'], p['doc_id'],
+                    '%.5g' % p['span_score'],
+                    '%.5g' % p['doc_score']])
         text = p['context']['text']
         start = p['context']['start']
         end = p['context']['end']
@@ -102,6 +98,7 @@ def process(question, candidates=None, top_n=1, n_docs=5):
                   text[end:])
         logger.info('[ Doc = %s ]' % p['doc_id'])
         logger.info(output + '\n')
+        sendMessage(encodeMessage(p['span'] + "|" + p['doc_id'] + "|" + '%.5g' % p['span_score'] + "|" '%.5g' % p['doc_score'] + "|" + output))
 
 
 banner = """
@@ -141,6 +138,5 @@ while True:
     #    sendMessage(encodeMessage("error process"))
     #sendMessage(encodeMessage("ready"))
     receivedMessage = getMessage()
-    if receivedMessage == "ping":
-        sendMessage(encodeMessage("pong"))
-        process("What is the element used to create a hyperlink to webpages?", top_n=5, n_docs=5)
+    sendMessage(encodeMessage("processing"))
+    process(receivedMessage, top_n=1, n_docs=1)

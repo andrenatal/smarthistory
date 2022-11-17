@@ -23,6 +23,12 @@
     "default_icon": "icons/message.svg"
   },
 
+  "sidebar_action": {
+    "default_icon": "icons/star.png",
+    "default_title" : "Annotator",
+    "default_panel": "sidebar_panel.html"
+  },
+
   "permissions": ["nativeMessaging"]
 
 }
