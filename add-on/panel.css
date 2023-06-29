@@ -41,7 +41,7 @@ header {
 .divResposta{
     background-color: rgb(60,61,74);
     color: white;
-    padding: 10px;
+    padding: 0px 10px 0px 10px;
 }
 
 .respostaLink {
@@ -64,7 +64,7 @@ header {
     height: 5vh;
     color: white;
     font-size: small;
-    padding: 5px;
+   padding: 5px;
 }
 
 #filterByconfidence {

@@ -27,9 +27,8 @@ browser.runtime.onMessage.addListener((message) => {
         document.getElementById("status").innerText = "Processing...";
         document.getElementById("status").style.display = "block";
     }
-    else if (message.command === "processed") {
+    else if (message.command === "response") {
         console.log("na sidebar = add processing msg");
-        document.getElementById("status").innerText = "";
         const divResposta = document.createElement("div");
         divResposta.className = "divResposta";
         const confidenceFilter = document.getElementById("confidenceFilter").value;
@@ -56,7 +55,7 @@ browser.runtime.onMessage.addListener((message) => {
                 divResposta.append(answer);
                 divResposta.append(document.createElement("br"));
                 divResposta.append(href);
-                if ((message.responses[response].hitscore < confidenceFilter || message.responses[response].answer.score < confidenceFilter)) {
+                if ((message.responses[response].hitscore < confidenceFilter && message.responses[response].answer.score < confidenceFilter)) {
                     const confidence = document.createElement("a");
                     confidence.innerText = "Low confidence";
                     confidence.className = "confidence";
@@ -65,9 +64,15 @@ browser.runtime.onMessage.addListener((message) => {
                     divResposta.append(confidence);
                 }
             }
-            document.getElementById("respostas").append(divResposta);
-            divResposta.append(document.createElement("hr"));
+            setTimeout(() => {
+                document.getElementById("respostas").append(divResposta);
+                divResposta.append(document.createElement("hr"));
+                divResposta.scrollIntoView(top);
+            }, 100);
         }
+    }
+    else if (message.command === "processed") {
+        document.getElementById("status").innerText = "";
         document.getElementById("ask").disabled = false;
     }
 });

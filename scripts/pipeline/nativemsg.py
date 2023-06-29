@@ -70,19 +70,23 @@ def askquestion(question, items):
         log("hits ")
 
         sql_search = "select data from history where idx = ?"
-        responses = []
         for hit in hits:
             #print(hit.score, hit.payload)
             cursor.execute(sql_search, [hit.id])
             rows = cursor.fetchall()
             answer = qa_model(question = [question] , context = rows[0][0])
-            responses.append({
-                "hitscore": hit.score,
-                "hitpayload": hit.payload,
-                "answer": answer
-            })
             log(f"hit.score: {hit.score} hit.payload {hit.payload} answer {answer}")
-        return responses
+            response = {
+                "command": "response",
+                "responses": [{
+                        "hitscore": hit.score,
+                        "hitpayload": hit.payload,
+                        "answer": answer
+                }]
+            }
+            json_str = json.dumps(response)
+            log("return:" + json_str)
+            sendMessage(encodeMessage(json_str))
     except Exception as err:
         log(f"Unexpected {err=}, {type(err)=}")
 
@@ -135,10 +139,9 @@ while True:
     elif receivedMessage["command"] == "question":
         log("question")
         sendMessage(encodeMessage("{\"command\": \"processing\"}"))
-        responselist = askquestion(receivedMessage["question"], receivedMessage["items"])
+        askquestion(receivedMessage["question"], receivedMessage["items"])
         response = {
-            "command": "processed",
-            "responses": responselist
+            "command": "processed"
         }
         json_str = json.dumps(response)
         log("return:" + json_str)
