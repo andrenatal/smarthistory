@@ -10,7 +10,7 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "drqa@example.org",
+      "id": "smarthistory@example.org",
       "strict_min_version": "50.0"
     }
   },
@@ -25,10 +25,27 @@
 
   "sidebar_action": {
     "default_icon": "icons/star.png",
-    "default_title" : "Annotator",
+    "default_title" : "Ask your history.",
     "default_panel": "sidebar_panel.html"
   },
 
-  "permissions": ["nativeMessaging"]
+  "permissions": [
+    "nativeMessaging",
+      "activeTab",
+      "http://*/*",
+      "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content_script.js"
+      ],
+      "all_frames": false,
+      "run_at": "document_idle"
+    }
+  ]
 
 }

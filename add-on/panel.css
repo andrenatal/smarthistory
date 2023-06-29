@@ -1,0 +1,68 @@
+body {
+  overflow: hidden;
+  background-color: rgb(60,61,74);
+  border: 1px;
+  font-size: medium;
+  display: grid;
+}
+
+header {
+    text-align: center;
+    color: red;
+}
+
+#respostas {
+    height: 78vh;
+    overflow: auto;
+    border: 1px solid black;
+}
+
+#status {
+    height: 3vh;
+    color: white;
+    font-size: small;
+    padding: 5px;
+}
+
+#topo {
+    height: 15vh;
+    width: 100vw;
+    display: grid;
+    text-align: center;
+}
+
+.divPergunta {
+    padding: 10px;
+    background-color: rgb(46,47,57);
+    font-style: italic;
+    color: white;
+}
+
+.divResposta{
+    background-color: rgb(60,61,74);
+    color: white;
+    padding: 10px;
+}
+
+.respostaLink {
+    color: white;
+    text-decoration: none;
+}
+
+.respostaLink:hover {
+    color: white;
+    text-decoration:underline;
+}
+
+.confidence {
+    font-size: small;
+    font-style: italic;
+    text-align: right;
+}
+
+#itemsDiv{
+    height: 5vh;
+    color: white;
+    font-size: small;
+    padding: 5px;
+}

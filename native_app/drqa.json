@@ -1,7 +1,0 @@
-{
-  "name": "drqa",
-  "description": "Example host for native messaging",
-  "path": "/Users/anatal/projects/stanford/DrQA/start_nativemsg.sh",
-  "type": "stdio",
-  "allowed_extensions": [ "drqa@example.org" ]
-}

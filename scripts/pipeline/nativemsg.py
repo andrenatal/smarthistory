@@ -6,117 +6,102 @@
 # LICENSE file in the root directory of this source tree.
 """Interactive interface to full DrQA pipeline."""
 
-import torch
 import argparse
-import prettytable
 import logging
 import sys
 import json
 import struct
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+import numpy as np
+from qdrant_client.models import PointStruct
+from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, util
+from bs4 import BeautifulSoup
+import hashlib
+import requests
+import sqlite3
+from transformers import pipeline
 
-from termcolor import colored
-from drqa import pipeline
-from drqa.retriever import utils
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-fmt = logging.Formatter('%(asctime)s: [ %(message)s ]', '%m/%d/%Y %I:%M:%S %p')
-console = logging.StreamHandler()
-console.setFormatter(fmt)
-logger.addHandler(console)
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--reader-model', type=str, default=None,
-                    help='Path to trained Document Reader model')
-parser.add_argument('--retriever-model', type=str, default=None,
-                    help='Path to Document Retriever model (tfidf)')
-parser.add_argument('--doc-db', type=str, default=None,
-                    help='Path to Document DB')
-parser.add_argument('--tokenizer', type=str, default=None,
-                    help=("String option specifying tokenizer type to "
-                          "use (e.g. 'corenlp')"))
-parser.add_argument('--candidate-file', type=str, default=None,
-                    help=("List of candidates to restrict predictions to, "
-                          "one candidate per line"))
-parser.add_argument('--no-cuda', action='store_true',
-                    help="Use CPU only")
-parser.add_argument('--gpu', type=int, default=-1,
-                    help="Specify GPU device id to use")
-args = parser.parse_args()
-
-args.cuda = not args.no_cuda and torch.cuda.is_available()
-if args.cuda:
-    torch.cuda.set_device(args.gpu)
-    logger.info('CUDA enabled (GPU %d)' % args.gpu)
-else:
-    logger.info('Running on CPU only.')
-
-if args.candidate_file:
-    logger.info('Loading candidates from %s' % args.candidate_file)
-    candidates = set()
-    with open(args.candidate_file) as f:
-        for line in f:
-            line = utils.normalize(line.strip()).lower()
-            candidates.add(line)
-    logger.info('Loaded %d candidates.' % len(candidates))
-else:
-    candidates = None
-
-logger.info('Initializing pipeline...')
-DrQA = pipeline.DrQA(
-    cuda=args.cuda,
-    fixed_candidates=candidates,
-    reader_model=args.reader_model,
-    ranker_config={'options': {'tfidf_path': args.retriever_model}},
-    db_config={'options': {'db_path': args.doc_db}},
-    tokenizer=args.tokenizer
+conn = sqlite3.connect('./tests/history.db')
+cursor = conn.cursor()
+qa_model = pipeline("question-answering")
+sentencetransformer = SentenceTransformer("multi-qa-MiniLM-L6-cos-v1")
+client = QdrantClient(path="./")
+client.recreate_collection(
+    collection_name="smarthistory",
+    vectors_config=VectorParams(size=384, distance=Distance.COSINE),
 )
-logger.info('Ready')
 
+def indexa(html, url,title, _idx):
+    bs = BeautifulSoup(html, "html.parser")
+    text = bs.find('body').get_text()
+    embeddings = sentencetransformer.encode(text)
+    point_id = hashlib.md5(f"{url}-{_idx}".encode()).hexdigest()
+    sql = "INSERT INTO history VALUES (?,?,?)"
+    records = [point_id, text, title]
+    cursor.execute(sql, records)
+    conn.commit()
 
-# ------------------------------------------------------------------------------
-# Drop in to interactive mode
-# ------------------------------------------------------------------------------
+    client.upsert(
+        collection_name="smarthistory",
+        points=[
+            PointStruct(
+                id=point_id,
+                vector=embeddings.tolist(),
+                payload={"url" : url, "title": title}
+            )
+        ]
+    )
 
+def askquestion(question, items):
+    try:
+        log("processing question: " + question)
+        query_vector = sentencetransformer.encode(question).tolist()
+        log("query_vector ")
+
+        hits = client.search(
+            collection_name="smarthistory",
+            query_vector=query_vector,
+            limit=int(items),
+            with_vectors=True
+        )
+
+        log("hits ")
+
+        sql_search = "select data from history where idx = ?"
+        responses = []
+        for hit in hits:
+            #print(hit.score, hit.payload)
+            cursor.execute(sql_search, [hit.id])
+            rows = cursor.fetchall()
+            answer = qa_model(question = [question] , context = rows[0][0])
+            responses.append({
+                "hitscore": hit.score,
+                "hitpayload": hit.payload,
+                "answer": answer
+            })
+            log(f"hit.score: {hit.score} hit.payload {hit.payload} answer {answer}")
+        return responses
+    except Exception as err:
+        log(f"Unexpected {err=}, {type(err)=}")
 
 def process(question, candidates=None, top_n=1, n_docs=5):
-    predictions = DrQA.process(
-        question, candidates, top_n, n_docs, return_context=True
-    )
-    table = prettytable.PrettyTable(
-        ['Rank', 'Answer', 'Doc', 'Answer Score', 'Doc Score']
-    )
-    for i, p in enumerate(predictions, 1):
-        logger.info([i, p['span'], p['doc_id'],
-                    '%.5g' % p['span_score'],
-                    '%.5g' % p['doc_score']])
-        text = p['context']['text']
-        start = p['context']['start']
-        end = p['context']['end']
-        output = (text[:start] +
-                  colored(text[start: end], 'green', attrs=['bold']) +
-                  text[end:])
-        logger.info('[ Doc = %s ]' % p['doc_id'])
-        logger.info(output + '\n')
-        sendMessage(encodeMessage(p['span'] + "|" + p['doc_id'] + "|" + '%.5g' % p['span_score'] + "|" '%.5g' % p['doc_score'] + "|" + output))
-
-
-banner = """
-Interactive DrQA
->> process(question, candidates=None, top_n=1, n_docs=5)
->> usage()
-"""
-
+#        sendMessage(encodeMessage(p['span'] + "|" + p['doc_id'] + "|" + '%.5g' % p['span_score'] + "|" '%.5g' % p['doc_score'] + "|" + output))
+    sendMessage(encodeMessage("processed"))
 
 # Python 3.x version
 # Read a message from stdin and decode it.
 def getMessage():
-    rawLength = sys.stdin.buffer.read(4)
-    if len(rawLength) == 0:
-        sys.exit(0)
-    messageLength = struct.unpack('@I', rawLength)[0]
-    message = sys.stdin.buffer.read(messageLength).decode('utf-8')
-    return json.loads(message)
+    try:
+        rawLength = sys.stdin.buffer.read(4)
+        if len(rawLength) == 0:
+            sys.exit(0)
+        messageLength = struct.unpack('@I', rawLength)[0]
+        message = sys.stdin.buffer.read(messageLength).decode('utf-8')
+        return json.loads(message)
+    except Exception:
+        log(Exception)
 
 # Encode a message for transmission,
 # given its content.
@@ -131,12 +116,30 @@ def sendMessage(encodedMessage):
     sys.stdout.buffer.write(encodedMessage['content'])
     sys.stdout.buffer.flush()
 
+def log(dados):
+    with open('/Users/anatal/projects/mozilla/smarthistory/scripts/pipeline/log.txt', 'a') as f:
+        f.writelines(dados)
+        f.writelines('\n')
+
 while True:
-    #try:
-    #    process("What is the element used to create a hyperlink to webpages?", top_n=5, n_docs=5)
-    #except:
-    #    sendMessage(encodeMessage("error process"))
-    #sendMessage(encodeMessage("ready"))
+    idx_counter = 0
     receivedMessage = getMessage()
-    sendMessage(encodeMessage("processing"))
-    process(receivedMessage, top_n=1, n_docs=1)
+    log(receivedMessage["command"])
+    if receivedMessage["command"] == "index":
+        log("indexa:")
+        log(receivedMessage["url"])
+        log(receivedMessage["body"])
+        sendMessage(encodeMessage("{\"command\": \"indexing\"}"))
+        indexa(receivedMessage["body"],receivedMessage["url"], receivedMessage["title"], idx_counter+1)
+        sendMessage(encodeMessage("{\"command\": \"indexed\"}"))
+    elif receivedMessage["command"] == "question":
+        log("question")
+        sendMessage(encodeMessage("{\"command\": \"processing\"}"))
+        responselist = askquestion(receivedMessage["question"], receivedMessage["items"])
+        response = {
+            "command": "processed",
+            "responses": responselist
+        }
+        json_str = json.dumps(response)
+        log("return:" + json_str)
+        sendMessage(encodeMessage(json_str))

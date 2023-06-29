@@ -1,0 +1,7 @@
+{
+  "name": "smarthistory",
+  "description": "Example host for native messaging",
+  "path": "/Users/anatal/projects/mozilla/smarthistory/start_nativemsg.sh",
+  "type": "stdio",
+  "allowed_extensions": [ "smarthistory@example.org" ]
+}

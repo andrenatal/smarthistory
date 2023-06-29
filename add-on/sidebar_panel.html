@@ -7,11 +7,21 @@
   </head>
 
 <body>
-  <p>Click inside the box to start taking notes on this page.</p>
-  <textarea id="questionbox">How can I create a link?</textarea>
-  <input type="button" value="Ask" id="ask"/>
-  <div id="respostas">
-
+  <div id="respostas"> </div>
+  <div id="status"></div>
+  <div id="itemsDiv">
+    <label for="items">Items to return?</label>
+    <select id="items" name="items">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+  <div id="topo">
+    <textarea id="questionbox">Who creates the Firefox browser?</textarea>
+    <input type="button" value="Ask" id="ask"/>
   </div>
   <script src="sidebar_panel.js"></script>
 </body>
