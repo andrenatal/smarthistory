@@ -66,3 +66,11 @@ header {
     font-size: small;
     padding: 5px;
 }
+
+#filterByconfidence {
+    margin-left: 25px;
+}
+
+#confidenceFilter{
+    width: 10vw;
+}
